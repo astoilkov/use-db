@@ -68,7 +68,7 @@ function useStorage<T>(
 
         // useSyncExternalStore.getSnapshot
         () => {
-            return syncData.get(key) as T | undefined
+            return syncData.has(key) ? syncData.get(key) as T | undefined : defaultValue
         },
 
         // useSyncExternalStore.getServerSnapshot

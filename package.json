@@ -65,6 +65,6 @@
         "vitest": "^2.0.3"
     },
     "dependencies": {
-        "local-db-storage": "^1.0.1"
+        "local-db-storage": "^2.0.0"
     }
 }

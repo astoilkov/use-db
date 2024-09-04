@@ -3,8 +3,7 @@
 > React hook for `IndexedDB` that mimics `useState` API
 
 [![Gzipped Size](https://img.shields.io/bundlephobia/minzip/use-db)](https://bundlephobia.com/result?p=use-db)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/astoilkov/use-db/main.yml?
-branch=main)](https://github.com/astoilkov/use-db/actions/workflows/main.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/astoilkov/use-db/main.yml?branch=main)](https://github.com/astoilkov/use-db/actions/workflows/main.yml)
 
 ## Install
 

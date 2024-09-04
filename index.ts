@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState, useSyncExternalStore } from 'react'
 import { DbStorage } from 'local-db-storage'
 
 const dbStorage = new DbStorage({
-    name: 'node_modules/use-db-storage'
+    name: 'node_modules/use-db'
 })
 const syncData = new Map<string, unknown>();
 
@@ -12,30 +12,30 @@ export type StorageStateOptions<T> = {
     optimistic?: boolean
 }
 
-// - `useDbStorage()` return type
+// - `useDb()` return type
 // - first two values are the same as `useState`
-export type StorageState<T> = [
+export type DbState<T> = [
     state: T,
     setState: Dispatch<SetStateAction<T>>,
     removeItem: () => void,
 ]
 
-export default function useDbStorage(
+export default function useDb(
     key: string,
     options?: StorageStateOptions<undefined>,
-): StorageState<unknown>
-export default function useDbStorage<T>(
+): DbState<unknown>
+export default function useDb<T>(
     key: string,
     options?: Omit<StorageStateOptions<T | undefined>, 'defaultValue'>,
-): StorageState<T | undefined>
-export default function useDbStorage<T>(
+): DbState<T | undefined>
+export default function useDb<T>(
     key: string,
     options?: StorageStateOptions<T>,
-): StorageState<T>
-export default function useDbStorage<T = undefined>(
+): DbState<T>
+export default function useDb<T = undefined>(
     key: string,
     options?: StorageStateOptions<T | undefined>,
-): StorageState<T | undefined> {
+): DbState<T | undefined> {
     const [defaultValue] = useState(options?.defaultValue)
     return useStorage(
         key,
@@ -48,7 +48,7 @@ function useStorage<T>(
     key: string,
     defaultValue: T | undefined,
     optimistic: boolean = true,
-): StorageState<T | undefined> {
+): DbState<T | undefined> {
     const value = useSyncExternalStore(
         // useSyncExternalStore.subscribe
         useCallback(

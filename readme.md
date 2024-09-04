@@ -1,23 +1,26 @@
-# `use-db-storage`
+# `use-db`
 
 > `IndexedDB` React hook that mimics `useState` API supporting optimistic updates
 
-[![Gzipped Size](https://img.shields.io/bundlephobia/minzip/use-db-storage)](https://bundlephobia.com/result?p=use-db-storage)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/astoilkov/use-db-storage/main.yml?branch=main)](https://github.com/astoilkov/use-db-storage/actions/workflows/main.yml)
+[![Gzipped Size](https://img.shields.io/bundlephobia/minzip/use-db)](https://bundlephobia.
+com/result?
+p=use-db)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/astoilkov/use-db/main.yml?
+branch=main)](https://github.com/astoilkov/use-db/actions/workflows/main.yml)
 
 ## Install
 
 ```bash
-npm install use-db-storage
+npm install use-db
 ```
 
 ## Usage
 
 ```ts
-import useDbStorage from 'use-db-storage'
+import useDb from 'use-db'
 
 export default function Todos() {
-    const [todos, setTodos] = useDbStorage('todos', {
+    const [todos, setTodos] = useDb('todos', {
         defaultValue: ['buy avocado', 'do 50 push-ups']
     })
 }
@@ -25,7 +28,7 @@ export default function Todos() {
 
 ## API
 
-#### `useDbStorage(key: string, options?: StorageStateOptions)`
+#### `useDb(key: string, options?: StorageStateOptions)`
 
 Returns `[value, setValue, removeItem]` when called. The first two values are the same as `useState()`. The third value calls `IDBObjectStore.delete()` and removes the data from the db.
 

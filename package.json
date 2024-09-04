@@ -1,11 +1,11 @@
 {
-    "name": "use-db-storage",
+    "name": "use-db",
     "version": "0.2.0",
     "description": "IndexedDB React hook that mimics useState API supporting optimistic updates",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/astoilkov/{{data.name}}"
+        "url": "git+https://github.com/astoilkov/use-db"
     },
     "funding": "https://github.com/sponsors/astoilkov",
     "author": {

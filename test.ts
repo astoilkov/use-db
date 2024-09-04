@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { renderHook } from "@testing-library/react";
-import useDbStorage from "./index.js";
+import useDb from "./index.js";
 
-describe("use-db-storage", () => {
+describe("use-db", () => {
     test('defaultValue accepts lazy initializer (like useState)', () => {
         const { result } = renderHook(() =>
-            useDbStorage('todos', {
+            useDb('todos', {
                 defaultValue: () => ['first', 'second'],
             }),
         )

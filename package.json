@@ -1,6 +1,6 @@
 {
     "name": "use-db",
-    "version": "0.2.0",
+    "version": "0.0.0",
     "description": "IndexedDB React hook that mimics useState API supporting optimistic updates",
     "license": "MIT",
     "repository": {

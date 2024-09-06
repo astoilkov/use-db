@@ -15,7 +15,7 @@ export default defineConfig({
         coverage: {
             enabled: true,
             extension: "js",
-            include: ["src/**/*"],
+            include: ["index.js"],
         },
     },
 });

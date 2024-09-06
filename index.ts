@@ -40,14 +40,14 @@ export default function useDb<T = undefined>(
     return useStorage(
         key,
         defaultValue,
-        options?.optimistic
+        options?.optimistic ?? true
     )
 }
 
 function useStorage<T>(
     key: string,
     defaultValue: T | undefined,
-    optimistic: boolean = true,
+    optimistic: boolean,
 ): DbState<T | undefined> {
     const value = useSyncExternalStore(
         // useSyncExternalStore.subscribe
@@ -77,14 +77,14 @@ function useStorage<T>(
 
     const setState = useCallback(
         (newValue: SetStateAction<T | undefined>): void => {
-            const value =
-                newValue instanceof Function ? newValue(syncData.get(key) as T | undefined) : newValue
-            const prev = syncData.get(key)
             const hasPrev = syncData.has(key)
+            const prev = hasPrev ? syncData.get(key) as T | undefined : defaultValue
+            const next =
+                newValue instanceof Function ? newValue(prev) : newValue
             if (optimistic) {
-                syncData.set(key, value)
+                syncData.set(key, next)
                 triggerCallbacks(key)
-                dbStorage.setItem(key, value).catch(() => {
+                dbStorage.setItem(key, next).catch(() => {
                     if (hasPrev) {
                         syncData.set(key, prev)
                     } else {
@@ -93,8 +93,8 @@ function useStorage<T>(
                     triggerCallbacks(key)
                 })
             } else {
-                dbStorage.setItem(key, value).then(() => {
-                    syncData.set(key, value)
+                dbStorage.setItem(key, next).then(() => {
+                    syncData.set(key, next)
                     triggerCallbacks(key)
                 })
             }

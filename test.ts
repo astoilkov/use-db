@@ -52,4 +52,80 @@ describe("use-db", () => {
         const [todos] = result.current;
         expect(todos).toStrictEqual(["first", "second", "third", "forth"]);
     });
+
+    // test("removes item from state", () => {
+    //     const { result } = renderHook(() =>
+    //         useDb("todos", { defaultValue: ["first", "second"] }),
+    //     );
+    //
+    //     act(() => {
+    //         const removeItem = result.current[2];
+    //         removeItem();
+    //     });
+    //
+    //     const [todos] = result.current;
+    //     expect(todos).toBeUndefined();
+    // });
+
+    test("persists state across hook re-renders", () => {
+        const { result, rerender } = renderHook(() =>
+            useDb("persistentTodos", { defaultValue: ["first", "second"] }),
+        );
+
+        act(() => {
+            const setTodos = result.current[1];
+            setTodos(["third", "fourth"]);
+        });
+
+        rerender();
+
+        const [todos] = result.current;
+        expect(todos).toStrictEqual(["third", "fourth"]);
+    });
+
+    test("handles complex objects", () => {
+        const complexObject = { nested: { array: [1, 2, 3], value: "test" } };
+        const { result } = renderHook(() =>
+            useDb("complexObject", { defaultValue: complexObject }),
+        );
+
+        const [storedObject] = result.current;
+        expect(storedObject).toEqual(complexObject);
+
+        act(() => {
+            const setObject = result.current[1];
+            setObject((prev) => ({
+                ...prev,
+                nested: { ...prev.nested, value: "updated" },
+            }));
+        });
+
+        const [updatedObject] = result.current;
+        expect(updatedObject).toEqual({
+            nested: { array: [1, 2, 3], value: "updated" },
+        });
+    });
+
+    test("handles undefined as a valid state", () => {
+        const { result } = renderHook(() => useDb("undefinedState"));
+
+        const [initialState] = result.current;
+        expect(initialState).toBeUndefined();
+
+        act(() => {
+            const setState = result.current[1];
+            setState("defined");
+        });
+
+        const [definedState] = result.current;
+        expect(definedState).toBe("defined");
+
+        act(() => {
+            const setState = result.current[1];
+            setState(undefined);
+        });
+
+        const [finalState] = result.current;
+        expect(finalState).toBeUndefined();
+    });
 });

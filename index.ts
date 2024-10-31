@@ -7,7 +7,7 @@ const dbStorage = new DbStorage({
 });
 const syncData = new Map<string, unknown>();
 
-export type StorageStateOptions<T> = {
+export type UseDbOptions<T> = {
     defaultValue?: T | (() => T);
     optimistic?: boolean;
 };
@@ -22,19 +22,19 @@ export type DbState<T> = [
 
 export default function useDb(
     key: string,
-    options?: StorageStateOptions<undefined>,
+    options?: UseDbOptions<undefined>,
 ): DbState<unknown>;
 export default function useDb<T>(
     key: string,
-    options?: Omit<StorageStateOptions<T | undefined>, "defaultValue">,
+    options?: Omit<UseDbOptions<T | undefined>, "defaultValue">,
 ): DbState<T | undefined>;
 export default function useDb<T>(
     key: string,
-    options?: StorageStateOptions<T>,
+    options?: UseDbOptions<T>,
 ): DbState<T>;
 export default function useDb<T = undefined>(
     key: string,
-    options?: StorageStateOptions<T | undefined>,
+    options?: UseDbOptions<T | undefined>,
 ): DbState<T | undefined> {
     const [defaultValue] = useState(options?.defaultValue);
     return useStorage(key, defaultValue, options?.optimistic ?? true);

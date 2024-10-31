@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from "react";
+import type { SetStateAction } from "react";
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { DbStorage } from "local-db-storage";
 
@@ -16,8 +16,8 @@ export type StorageStateOptions<T> = {
 // - first two values are the same as `useState`
 export type DbState<T> = [
     state: T,
-    setState: Dispatch<SetStateAction<T>>,
-    removeItem: () => void,
+    setState: (value: SetStateAction<T>) => Promise<void>,
+    removeItem: () => Promise<void>,
 ];
 
 export default function useDb(
@@ -74,9 +74,9 @@ function useStorage<T>(
     );
 
     const setState = useCallback(
-        (newValue: SetStateAction<T | undefined>): void => {
+        (newValue: SetStateAction<T | undefined>): Promise<void> => {
             const hasPrev = syncData.has(key);
-            const prev = hasPrev
+            const prev = syncData.has(key)
                 ? (syncData.get(key) as T | undefined)
                 : defaultValue;
             const next =
@@ -84,7 +84,7 @@ function useStorage<T>(
             if (optimistic) {
                 syncData.set(key, next);
                 triggerCallbacks(key);
-                dbStorage.setItem(key, next).catch(() => {
+                return dbStorage.setItem(key, next).catch(() => {
                     if (hasPrev) {
                         syncData.set(key, prev);
                     } else {
@@ -93,7 +93,7 @@ function useStorage<T>(
                     triggerCallbacks(key);
                 });
             } else {
-                dbStorage.setItem(key, next).then(() => {
+                return dbStorage.setItem(key, next).then(() => {
                     syncData.set(key, next);
                     triggerCallbacks(key);
                 });
@@ -108,14 +108,14 @@ function useStorage<T>(
         if (optimistic) {
             syncData.delete(key);
             triggerCallbacks(key);
-            dbStorage.removeItem(key).catch(() => {
+            return dbStorage.removeItem(key).catch(() => {
                 if (hasPrev) {
                     syncData.set(key, prev);
                     triggerCallbacks(key);
                 }
             });
         } else {
-            dbStorage.removeItem(key).then(() => {
+            return dbStorage.removeItem(key).then(() => {
                 syncData.delete(key);
                 triggerCallbacks(key);
             });

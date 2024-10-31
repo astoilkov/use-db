@@ -24,6 +24,40 @@ export default function Todos() {
 ```
 
 <details>
+<summary>Todo list example</summary>
+<p></p>
+
+```tsx
+import React, { useState } from 'react'
+import useDb from 'use-db'
+
+export default function Todos() {
+    const [todos, setTodos] = useDb('todos', {
+        defaultValue: ['buy avocado']
+    })
+    const [query, setQuery] = useState('')
+
+    function onClick() {
+        setQuery('')
+        setTodos([...todos, query])
+    }
+
+    return (
+        <>
+            <input value={query} onChange={e => setQuery(e.target.value)} />
+            <button onClick={onClick}>Create</button>
+            {todos.map(todo => (
+                <div>{todo}</div>
+            ))}
+        </>
+    )
+}
+
+```
+
+</details>
+
+<details>
 <summary id="remove-item">Removing the data from <code>IndexedDB</code> and resetting to the default</summary>
 <p></p>
 

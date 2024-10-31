@@ -30,7 +30,7 @@ export default function Todos() {
 The `removeItem()` method will reset the value to its default and will remove the data from the `IndexedDB`. It returns to the same state as when the hook was initially created.
 
 ```tsx
-import useLocalStorageState from 'use-local-storage-state'
+import useDb from 'use-db'
 
 export default function Todos() {
     const [todos, setTodos, removeItem] = useDb('todos', {

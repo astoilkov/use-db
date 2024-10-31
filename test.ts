@@ -1,8 +1,9 @@
 import "fake-indexeddb/auto";
 
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vitest } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import useDb, { type UseDbOptions } from "./index.js";
+import { DbStorage } from "local-db-storage";
 
 describe("use-db", () => {
     describe("optimistic", () => {
@@ -65,7 +66,7 @@ describe("use-db", () => {
             expect(todos).toStrictEqual(["first", "second", "third", "forth"]);
         });
 
-        test("removes item from state", () => {
+        test("removes item from state", async () => {
             const key = crypto.randomUUID();
             const { result } = renderHook(() =>
                 useDb(key, {
@@ -74,9 +75,9 @@ describe("use-db", () => {
             );
 
             {
-                act(() => {
+                await act(() => {
                     const setTodos = result.current[1];
-                    setTodos(["third", "forth"]);
+                    return setTodos(["third", "forth"]);
                 });
                 const [todos] = result.current;
                 expect(todos).toStrictEqual(["third", "forth"]);
@@ -166,6 +167,66 @@ describe("use-db", () => {
             const { unmount } = renderHook(() => useDb(key));
             unmount();
         });
+
+        test("set state throws an error", () => {
+            const key = crypto.randomUUID();
+            const { result } = renderHook(() => useDb(key));
+
+            vitest
+                .spyOn(DbStorage.prototype, "setItem")
+                .mockReturnValue(Promise.reject("QuotaExceededError"));
+
+            act(() => {
+                const setState = result.current[1];
+                setState("defined");
+            });
+        });
+
+        test("set state throws an error and reverts to previous state", async () => {
+            const key = crypto.randomUUID();
+            const { result } = renderHook(() => useDb(key));
+
+            await act(() => {
+                const setState = result.current[1];
+                return setState(1);
+            });
+
+            vitest
+                .spyOn(DbStorage.prototype, "setItem")
+                .mockReturnValue(Promise.reject("QuotaExceededError"));
+
+            await act(() => {
+                const setState = result.current[1];
+                return setState(2);
+            });
+
+            const [number] = result.current;
+            expect(number).toBe(1);
+        });
+
+        test("remove item throws an error and reverts to previous state", async () => {
+            const key = crypto.randomUUID();
+            const { result } = renderHook(() =>
+                useDb(key, { defaultValue: 1 }),
+            );
+
+            await act(() => {
+                const [, setNumber] = result.current;
+                return setNumber(2);
+            });
+
+            vitest
+                .spyOn(DbStorage.prototype, "removeItem")
+                .mockReturnValue(Promise.reject("QuotaExceededError"));
+
+            await act(() => {
+                const removeItem = result.current[2];
+                return removeItem();
+            });
+
+            const [number] = result.current;
+            expect(number).toBe(2);
+        });
     });
 
     describe("non-optimistic", () => {
@@ -198,6 +259,34 @@ describe("use-db", () => {
 
             const [todos] = result.current;
             expect(todos).toStrictEqual(["third", "forth"]);
+        });
+
+        test("removes item from state", async () => {
+            const key = crypto.randomUUID();
+            const { result } = renderHook(() =>
+                useDb(key, {
+                    optimistic: false,
+                    defaultValue: ["first", "second"],
+                }),
+            );
+
+            {
+                await act(() => {
+                    const setTodos = result.current[1];
+                    return setTodos(["third", "forth"]);
+                });
+                const [todos] = result.current;
+                expect(todos).toStrictEqual(["third", "forth"]);
+            }
+
+            {
+                await act(() => {
+                    const removeItem = result.current[2];
+                    return removeItem();
+                });
+                const [todos] = result.current;
+                expect(todos).toStrictEqual(["first", "second"]);
+            }
         });
     });
 });

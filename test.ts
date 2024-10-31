@@ -53,19 +53,29 @@ describe("use-db", () => {
         expect(todos).toStrictEqual(["first", "second", "third", "forth"]);
     });
 
-    // test("removes item from state", () => {
-    //     const { result } = renderHook(() =>
-    //         useDb("todos", { defaultValue: ["first", "second"] }),
-    //     );
-    //
-    //     act(() => {
-    //         const removeItem = result.current[2];
-    //         removeItem();
-    //     });
-    //
-    //     const [todos] = result.current;
-    //     expect(todos).toBeUndefined();
-    // });
+    test("removes item from state", () => {
+        const { result } = renderHook(() =>
+            useDb("todos", { defaultValue: ["first", "second"] }),
+        );
+
+        {
+            act(() => {
+                const setTodos = result.current[1];
+                setTodos(["third", "forth"]);
+            });
+            const [todos] = result.current;
+            expect(todos).toStrictEqual(["third", "forth"]);
+        }
+
+        {
+            act(() => {
+                const removeItem = result.current[2];
+                removeItem();
+            });
+            const [todos] = result.current;
+            expect(todos).toStrictEqual(["first", "second"]);
+        }
+    });
 
     test("persists state across hook re-renders", () => {
         const { result, rerender } = renderHook(() =>

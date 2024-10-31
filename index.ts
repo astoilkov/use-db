@@ -37,10 +37,10 @@ export default function useDb<T = undefined>(
     options?: UseDbOptions<T | undefined>,
 ): DbState<T | undefined> {
     const [defaultValue] = useState(options?.defaultValue);
-    return useStorage(key, defaultValue, options?.optimistic ?? true);
+    return useDbStorage(key, defaultValue, options?.optimistic ?? true);
 }
 
-function useStorage<T>(
+function useDbStorage<T>(
     key: string,
     defaultValue: T | undefined,
     optimistic: boolean,

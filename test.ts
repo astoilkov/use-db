@@ -137,8 +137,8 @@ describe("use-db", () => {
             });
         });
 
-        const key = crypto.randomUUID();
         test("handles undefined as a valid state", () => {
+            const key = crypto.randomUUID();
             const { result } = renderHook(() => useDb(key));
 
             const [initialState] = result.current;
@@ -159,6 +159,12 @@ describe("use-db", () => {
 
             const [finalState] = result.current;
             expect(finalState).toBeUndefined();
+        });
+
+        test("unmount", () => {
+            const key = crypto.randomUUID();
+            const { unmount } = renderHook(() => useDb(key));
+            unmount();
         });
     });
 

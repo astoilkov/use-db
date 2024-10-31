@@ -33,9 +33,7 @@ Returns `[value, setValue, removeItem]` when called. The first two values are th
 
 Type: `string`
 
-The key used when calling `localStorage.setItem(key)` and `localStorage.getItem(key)`.
-
-⚠️ Be careful with name conflicts as it is possible to access a property which is already in `localStorage` that was created from another place in the codebase or in an old version of the application.
+⚠️ Be careful with name conflicts as it is possible to access a property which is already in `IndexedDB` that was created from another place in the codebase or in an old version of the application.
 
 #### `options.defaultValue`
 

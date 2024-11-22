@@ -1,5 +1,11 @@
 import type { SetStateAction } from "react";
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+    useSyncExternalStore,
+} from "react";
 import { DbStorage } from "local-db-storage";
 
 const dbStorage = new DbStorage({
@@ -45,6 +51,7 @@ function useDbStorage<T>(
     defaultValue: T | undefined,
     optimistic: boolean,
 ): DbState<T | undefined> {
+    const [ready] = useState(() => createReady());
     const value = useSyncExternalStore(
         // useSyncExternalStore.subscribe
         useCallback(
@@ -75,29 +82,38 @@ function useDbStorage<T>(
 
     const setState = useCallback(
         (newValue: SetStateAction<T | undefined>): Promise<void> => {
-            const hasPrev = syncData.has(key);
-            const prev = syncData.has(key)
-                ? (syncData.get(key) as T | undefined)
-                : defaultValue;
-            const next =
-                newValue instanceof Function ? newValue(prev) : newValue;
-            if (optimistic) {
-                syncData.set(key, next);
-                triggerCallbacks(key);
-                return dbStorage.setItem(key, next).catch(() => {
-                    if (hasPrev) {
-                        syncData.set(key, prev);
-                    } else {
-                        syncData.delete(key);
-                    }
-                    triggerCallbacks(key);
-                });
-            } else {
-                return dbStorage.setItem(key, next).then(() => {
+            const set = (): Promise<void> => {
+                const hasPrev = syncData.has(key);
+                const prev = syncData.has(key)
+                    ? (syncData.get(key) as T | undefined)
+                    : defaultValue;
+                const next =
+                    newValue instanceof Function ? newValue(prev) : newValue;
+
+                if (optimistic) {
                     syncData.set(key, next);
                     triggerCallbacks(key);
-                });
+                    return dbStorage.setItem(key, next).catch(() => {
+                        if (hasPrev) {
+                            syncData.set(key, prev);
+                        } else {
+                            syncData.delete(key);
+                        }
+                    });
+                } else {
+                    return dbStorage
+                        .setItem(key, next)
+                        .then(() => {
+                            syncData.set(key, next);
+                            triggerCallbacks(key);
+                        })
+                        .catch(() => {});
+                }
+            };
+            if (!ready.is) {
+                return ready.promise.then(() => set())
             }
+            return set();
         },
         [key],
     );
@@ -105,6 +121,7 @@ function useDbStorage<T>(
     const removeItem = useCallback(() => {
         const prev = syncData.get(key);
         const hasPrev = syncData.has(key);
+
         if (optimistic) {
             syncData.delete(key);
             triggerCallbacks(key);
@@ -115,12 +132,35 @@ function useDbStorage<T>(
                 }
             });
         } else {
-            return dbStorage.removeItem(key).then(() => {
-                syncData.delete(key);
-                triggerCallbacks(key);
-            });
+            return dbStorage
+                .removeItem(key)
+                .then(() => {
+                    syncData.delete(key);
+                    triggerCallbacks(key);
+                })
+                .catch(() => {});
         }
     }, [key]);
+
+    const [, forceRender] = useState(0);
+    useEffect(() => {
+        if (ready.is) return;
+        let disposed = false;
+        dbStorage
+            .getItem(key)
+            .then((value) => {
+                ready.resolve();
+                if (!disposed && syncData.get(key) !== value) {
+                    syncData.set(key, value);
+                    forceRender((prev) => prev + 1);
+                }
+            })
+            .catch(() => {})
+            .finally(() => ready.resolve());
+        return () => {
+            disposed = true;
+        };
+    });
 
     return useMemo(
         () => [value, setState, removeItem],
@@ -134,4 +174,26 @@ function triggerCallbacks(key: string): void {
     for (const callback of [...callbacks]) {
         callback(key);
     }
+}
+
+function createReady(): {
+    promise: Promise<void>;
+    resolve: () => void;
+    is: boolean;
+} {
+    let resolveFn: () => void;
+    let completed = false;
+    const promise = new Promise<void>((resolve) => {
+        resolveFn = () => {
+            completed = true;
+            resolve();
+        };
+    });
+    return {
+        promise,
+        resolve: resolveFn!,
+        get is() {
+            return completed;
+        },
+    };
 }

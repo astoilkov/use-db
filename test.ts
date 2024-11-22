@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto";
 
-import { describe, expect, test, vitest } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
 import useDb, { type UseDbOptions } from "./index.js";
 import { DbStorage } from "local-db-storage";
@@ -172,9 +172,9 @@ describe("use-db", () => {
             const key = crypto.randomUUID();
             const { result } = renderHook(() => useDb(key));
 
-            vitest
-                .spyOn(DbStorage.prototype, "setItem")
-                .mockReturnValue(Promise.reject("QuotaExceededError"));
+            vi.spyOn(DbStorage.prototype, "setItem").mockReturnValue(
+                Promise.reject("QuotaExceededError"),
+            );
 
             act(() => {
                 const setState = result.current[1];
@@ -191,9 +191,9 @@ describe("use-db", () => {
                 return setState(1);
             });
 
-            vitest
-                .spyOn(DbStorage.prototype, "setItem")
-                .mockReturnValue(Promise.reject("QuotaExceededError"));
+            vi.spyOn(DbStorage.prototype, "setItem").mockReturnValue(
+                Promise.reject("QuotaExceededError"),
+            );
 
             await act(() => {
                 const setState = result.current[1];
@@ -215,9 +215,9 @@ describe("use-db", () => {
                 return setNumber(2);
             });
 
-            vitest
-                .spyOn(DbStorage.prototype, "removeItem")
-                .mockReturnValue(Promise.reject("QuotaExceededError"));
+            vi.spyOn(DbStorage.prototype, "removeItem").mockReturnValue(
+                Promise.reject("QuotaExceededError"),
+            );
 
             await act(() => {
                 const removeItem = result.current[2];

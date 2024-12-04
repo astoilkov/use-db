@@ -11,6 +11,13 @@
 npm install use-db
 ```
 
+## Why
+
+Why this over [`use-local-storage-state`](https://github.com/astoilkov/use-local-storage-state)?
+- **Capacity.** `IndexedDB` can store hundred of megabytes to gigabytes of data. `localStorage` limit is around 5-10MB.
+- **Performance.** `IndexedDB` is async and doesn't block the UI. `IndexedDB` can store objects without serialization which shaves off the time to do `JSON.parse()` and `JSON.stringify()` that's needed when working with `localStorage`.
+- **Availability.** `IndexedDB` is available both in Web Worker and Service Worker, `localStorage` is not. You can write data in those places and then access it in the main thread.
+
 ## Usage
 
 ```ts

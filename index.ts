@@ -147,8 +147,8 @@ function useDbStorage<T>(
         if (ready.is) return;
         let disposed = false;
         dbStorage
-            .getItem(key)
-            .then((value) => {
+            .getItem<T>(key)
+            .then((value: T | undefined) => {
                 ready.resolve();
                 if (!disposed && syncData.get(key) !== value) {
                     syncData.set(key, value);
@@ -160,7 +160,7 @@ function useDbStorage<T>(
         return () => {
             disposed = true;
         };
-    });
+    }, [key]);
 
     return useMemo(
         () => [value, setState, removeItem],

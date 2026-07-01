@@ -27,6 +27,7 @@
         "persistent"
     ],
     "type": "module",
+    "packageManager": "bun",
     "exports": {
         "types": "./index.d.ts",
         "default": "./index.js"
@@ -37,9 +38,9 @@
     },
     "scripts": {
         "build": "tsc",
-        "test": "yarn build && vitest run --coverage",
-        "test:ui": "yarn build && vitest --ui --coverage --reporter html",
-        "release": "yarn build && np"
+        "test": "bun run build && vitest run --coverage",
+        "test:ui": "bun run build && vitest --ui --coverage --reporter html",
+        "release": "bun run build && np"
     },
     "files": [
         "index.js",

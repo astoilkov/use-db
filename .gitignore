@@ -1,8 +1,8 @@
 node_modules/
 coverage/
 
-# as Sindre Sorhus
-yarn.lock
+bun.lock
+bun.lockb
 
 *.js
 *.d.ts

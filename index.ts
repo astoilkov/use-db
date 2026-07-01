@@ -149,14 +149,17 @@ function useDbStorage<T>(
         dbStorage
             .getItem(key)
             .then((value) => {
-                ready.resolve();
                 if (!disposed && syncData.get(key) !== value) {
                     syncData.set(key, value);
                     forceRender((prev) => prev + 1);
                 }
             })
             .catch(() => {})
-            .finally(() => ready.resolve());
+            .finally(() => {
+                if (!disposed) {
+                    ready.resolve();
+                }
+            });
         return () => {
             disposed = true;
         };
